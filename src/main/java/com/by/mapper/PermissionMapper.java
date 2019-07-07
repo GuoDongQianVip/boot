@@ -17,4 +17,6 @@ public interface PermissionMapper {
     void update(Permission permission);
     @Delete("delete from t_permission where permission_id = #{permissionId}")
     void deleteById(Integer permissionId);
+    @Select("select * from t_permission")
+    List<Permission> select();
 }

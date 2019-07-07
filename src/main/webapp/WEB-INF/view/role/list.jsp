@@ -1,217 +1,217 @@
-<%--
-  Created by IntelliJ IDEA.
-  User: user
-  Date: 2019/6/20
-  Time: 19:46
-  To change this template use File | Settings | File Templates.
---%>
-<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%--  Created by IntelliJ IDEA.  
+User: Lenovo  
+Date: 2019/7/2  
+Time: 9:01 
+To change this template use File | Settings | File Templates.--%>
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@taglib prefix="shiro" uri="http://shiro.apache.org/tags"%>
+<%
+    String path = request.getContextPath();
+    String basePath = request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort() + path + "/";
+%>
 <html>
 <head>
-    <title>Title</title>
-    <link rel="stylesheet" type="text/css" href="/webjars/github-com-novaeye-jquery-easyui-bower/1.5.0.1/themes/default/easyui.css">
-    <link rel="stylesheet" type="text/css" href="/webjars/github-com-novaeye-jquery-easyui-bower/1.5.0.1/themes/icon.css">
-    <script type="text/javascript" src="<%=request.getContextPath()%>/webjars/github-com-novaeye-jquery-easyui-bower/1.5.0.1/jquery.min.js"></script>
-    <script type="text/javascript" src="/webjars/github-com-novaeye-jquery-easyui-bower/1.5.0.1/jquery.easyui.min.js"></script>
-    <script type="text/javascript" src="/webjars/github-com-novaeye-jquery-easyui-bower/1.5.0.1/locale/easyui-lang-zh_CN.js"></script>
-    <script>
-        $(function () {
-            $('#dg').datagrid({
-                url:'/role/list',
-                fitColumns:true,
-                //pagination:true,//分页插件
-                /* pageSize:5,
-                 pageList:[5,10,15,20,25],*/
-                columns:[[
-                     {field:'roleId',title:'角色编号',width:100},
-                    {field:'roleName',title:'角色姓名',width:100},
-                ]],toolbar: [{
-                    iconCls: 'icon-add',
-                    title:'增加',
-                    handler: function(){
-                        showDialog("addDialog","增加页面");
-                    }
-                },'-',{
-                    iconCls: 'icon-cancel',
-                    title:'删除',
-                    handler: function(){
-                        deleterole();
-                    }
-                },'-', {
-                    iconCls: 'icon-edit',
-                    title: '修改',
-                    handler: function () {
-                        update();
-                    }
+    <base href="<%=basePath%>">
+    <title>标题</title>
+    <link rel="stylesheet" href="/webjars/layui/2.4.5/css/layui.css">
+    <script src="/webjars/jquery/3.4.1/jquery.min.js"></script>
+    <script src="/webjars/layui/2.4.5/layui.js"></script>
+</head>
+<body>
+<table class="layui-hide" id="test" lay-filter="userTableFilter">
+</table>
 
-                }]
-            });
+<div style="display: none;" id="givePermission">
+    <form class="layui-form">
+        <input type="hidden" name="roleId" id="roleId">
+        <div class="layui-form-item">
+            <label class="layui-form-label">权限：</label>
+            <div class="layui-input-block" id="permissionId">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-input-block">
+                <button class="layui-btn" lay-submit lay-filter="givePermissionSubmit">立即提交</button>
+                <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+            </div>
+        </div>
+    </form>
+</div>
+<div style="display: none;" id="giveRole">
+    <form class="layui-form">
+        <div class="layui-form-item">
+            <label class="layui-form-label">增加角色：</label>
+            <div class="layui-input-block" id="addpage">
+                <input type="text" name="roleName">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-input-block">
+                <button class="layui-btn" lay-submit lay-filter="giveRoleSubmit">立即提交</button>
+                <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+            </div>
+        </div>
+    </form>
+</div>
 
-            function addStu() {
-                $('#addStu').dialog({
-                    title: '增加学生',
-                    width: 400,
-                    height: 200,
-                    closed: false,
-                    cache: false,
-                    modal: true
+<script>
+    layui.use(['table','layer','form','jquery'], function(){
+        var table = layui.table;
+        var form = layui.form;
+        var layer = layui.layer;
+        var $ =layui.jquery;
+       var active = {
+            "showPermissionByRoleId":function (roleId) {
+                $.get("/role/rolePermissions",{"roleId":roleId},function (data) {
+                    var permissions= data.permissions;
+                    var permissionIds = data.permissionIds;
+                    $("#permissionId").empty();//清除当前元素中的对象
+                    for (var i = 0; i <permissions.length ; i++) {
+                        var che = '';
+                        if(permissionIds.indexOf(permissions[i].permissionId)>-1){
+                            che = 'checked';
+                        }
+                        $("#permissionId").append('<input type="checkbox"'+che+' name="permissions['+i+']" value="'+permissions[i].permissionId+'"  title="'+permissions[i].permissionName+'"><br>');
+                    }
+                    form.render();//更新全部
+                },'json');
+            }
+        }
+        //监听提交
+       form.on('submit(givePermissionSubmit)', function(data){
+            console.log(data.field);//角色ids
+
+            //ajax赋角色
+            $.post("/role/rolePermission",data.field,function(data){
+                if(data.success){
+
+               table.reload("test", {page:{curr:1}});//从第一页加载
+
+           }else{
+                    layer.msg('失败！');
+                }
+                layer.closeAll();
+                form.render();//更新全部
+            },"json")
+
+            return false;//防止表单自动提交
+        });
+        table.render({
+            elem: '#test'
+            ,height:'full-60'
+            ,url:'/role/list'
+            ,page:true
+            ,toolbar:'#tableToolBar'
+            ,cols: [[
+                {type: 'checkbox', fixed: 'left'}//复选框
+                ,{field:'roleId',title: '角色编号',sort: true, fixed: 'left'}
+                ,{field:'roleName',title: '角色名程'}
+                ,{field:'permissions',title: '权限名称',
+                        templet: function(d){
+                               var permissions=d.permissions;
+                               var str = "";
+                                for (var i = 0; i <permissions.length ; i++) {
+                                    str += ','+permissions[i].permissionName;
+                                }
+                                str=str.substring(1);
+                            return str;
+                    }
+                }
+                ,{fixed: 'right', title:'操作', toolbar: '#userToolBar', width:150}
+            ]]
+        });
+        table.on('tool(userTableFilter)',function (obj) {
+            var data =obj.data;
+            var layEvent = obj.event;
+            var tr= obj.tr;
+            if (layEvent == 'del'){
+                layer.confirm('真的删除吗',function(index) {
+                    $.post('/role/delete/'+data.roleId,{'_method':'delete'},function(data) {
+                        if (data == 'success'){
+                            obj.del();
+                        }else{
+                            layer.msg('删除失败！');
+                        }
+                    },'text');
+                    layer.close(index);
+                })
+            }else if(layEvent === 'edit') {
+                var roleId = data.roleId;
+                $("#roleId").val(roleId);
+                active.showPermissionByRoleId(roleId);
+                layer.open({
+                    type: 1,
+                    title: "赋权限",
+                    content: $("#givePermission") //这里content是一个普通的String
+                    , area: ['500px', '300px']
+                    , icon: 0
                 });
             }
         })
-        function showDialog(id,tit){
-            $('#'+id).dialog({
-                title: tit,
-                width: 400,
-                height: 200,
-                closed: false,
-                cache: false,
-                modal: true
-            });
-        }
-        //删除单个数据
-            function deleterole(){
-                // 返回第一个被选中的行或如果没有选中的行则返回null。
-                var  role= $('#dg').datagrid('getSelected');
-                if(role == null){
-                    alert("请选择需要删除的数据！");
-                    return ;
-                }
-                $.messager.confirm('确认','确定要删除【'+role.roleId+'】吗？',function(r){
-                    if (r){
-                        var id = role.roleId;
-                        $.ajax({
-                            url:"/role/delete/"+id,
-                            type:"delete",
-                        data:{
-                        "_method":"delete"
-                    },success:function(data){
-                            if(data == "success"){
-                                $.messager.alert('提示','删除成功');
-                            }else{
-                                $.messager.alert('提示',"删除失败")
-                            }
-                            //刷新
-                            $('#dg').datagrid('reload');
-                        }
-                    })
-            }
+        //对表格顶部工具栏的监听 toolbar
+        table.on('toolbar(userTableFilter)', function(obj){
+            var checkStatus = table.checkStatus(obj.config.id);
+            switch(obj.event){
+                case 'add':
+                    layer.open({
+                        type: 1,
+                        title:"增加",
+                        content: $("#giveRole") //这里content是一个普通的String
+                        ,area: ['500px', '300px']
+                        ,icon: 0
+                    });
+                    break;
+
+            };
         });
-        }
-        function submitForm() {
-            $.messager.progress();	// 显示进度条
-            $('#ff').form('submit', {
-                url: "/role/add",
-                onSubmit: function () {
-                    var isValid = $(this).form('validate');
-                    if (!isValid) {
-                        $.messager.progress('close');	// 如果表单是无效的则隐藏进度条
-                    }
-                    return isValid;	// 返回false终止表单提交
-                },
-                success: function (data) {
-                    if (data == 'success') {
-                        //close
-                        $('#addDialog').dialog("close");
-                        //刷新
-                        $('#dg').datagrid('reload');
-                        //重置表单
-                        $('#ff').form("reset");
-                    }
-                    $.messager.progress('close');	// 如果提交成功则隐藏进度条
+        form.on('submit(giveRoleSubmit)', function(data){
+            console.log(data.field);//角色ids
+            //ajax赋角色
+            $.post("/role/add",{"roleName":data.field.roleName},function(data){
+                if(data.success){
+                    table.reload("test", {page:{curr:1}});//从第一页加载
+                }else{
+                    layer.msg('失败！');
                 }
-            });
-        }
-        function clearForm() {
-            $('#ff').form('clear');
-        }
+                layer.closeAll();
+                form.render();//更新全部
+            },"json")
 
-        function update(){
-            //添加修改弹框
-            showDialog("updateDialog","修改页面");
-            //数据回显
-            var role = $('#dg').datagrid('getSelected');
-            if(role==null){
-                return;
+            return false;//防止表单自动提交
+        });
+        function tabAdd(title,url,id){
+            //如果没有选项卡
+            if($(".layui-tab-title li[lay-id]").length <= 0){
+                //增加选择卡
+                //新增一个Tab项
+                //tabAdd("容器的 lay-filter ")
+                //新增一个Tab项
+                active.tabAdd(title,url,id);
+            }else{
+                //判断是否重复
+                var flag = false;//没有重复
+                $(".layui-tab-title li[lay-id]").each(function(json){
+                    if($(this).attr("lay-id") == id){
+                        flag = true;
+                    }
+                })
+                if(flag == false){
+                    active.tabAdd(title,url,id);
+                }
             }
-            $('#update').form('load','/role/selectById/'+role.roleId);
+            //切换到指定Tab项
+            active.tabChange(id);
         }
 
-        function updateForm() {
-            $.messager.progress();	// 显示进度条
-            $('#update').form('submit', {
-                url: "/role/update",
-                /*
-                    onSubmit：在表单提交之前调用的函数
-                        return true ：提交表单
-                 */
-                onSubmit: function () {
-                    //验证表达是否通过验证
-                    //required:true 必填项
-                    var isValid = $(this).form('validate');
-                    if (!isValid) {
-                        $.messager.progress('close');	// 如果表单是无效的则隐藏进度条
-                    }
-                    return isValid;	// 返回false终止表单提交
-                },
-                success: function (data) {
-                    console.log(data)
-                    if (data == 'success') {
-                        //close
-                        $('#updateDialog').dialog("close");
-                        //刷新
-                        $('#dg').datagrid('reload');
-                        //重置表单
-                        $('#update').form("reset");
-                    }
-                    $.messager.progress('close');	// 如果提交成功则隐藏进度条
-                }
-            });
-        }
-        function clearForm() {
-            $('#update').form('clear');
-        }
-    </script>
-</head>
-<body>
-<table id="dg">
-</table>
-<form action="" method="post">
-    <input id="ss" type="hidden"></input>
-    <div id="mm" style="width:120px">
-        <div data-options="name:'all',iconCls:'icon-ok'"></div>
-        <div data-options="name:'sports'"></div>
-    </div>
-</form>
-<div id="addDialog" style="display: none;">
-    <form id="ff" method="post">
-        <table cellpadding="6">
-            <tr>
-                <td>角色姓名：</td>
-                <td><input class="easyui-textbox" type="text" name="roleName" data-options="required:true"></input></td>
-            </tr>
-        </table>
-    </form>
-    <div style="text-align:center;padding:5px">
-        <a href="javascript:void(0)" class="easyui-linkbutton" style="width:80px" onclick="submitForm()">提交</a>
-        <a href="javascript:void(0)" class="easyui-linkbutton" style="width:80px" onclick="clearForm()">重置</a>
-    </div>
-</div>
-
-<div id="updateDialog" style="display: none;">
-    <form id="update" method="post">
-        <input type="hidden" name="stuId">
-        <input type="hidden" name="_method" value="put">
-        <table cellpadding="6">
-            <tr>
-                <td>角色姓名：</td>
-                <td><input class="easyui-textbox" type="text" name="roleName" data-options="required:true"></input></td>
-            </tr>
-        </table>
-    </form>
-    <div style="text-align:center;padding:5px">
-        <a href="javascript:void(0)" class="easyui-linkbutton" style="width:80px" onclick="updateForm()">提交</a>
-        <a href="javascript:void(0)" class="easyui-linkbutton" style="width:80px" onclick="clearForm()">重置</a>
-    </div>
-</div>
+    });
+</script>
+<script type="text/html" id="userToolBar">
+    <a class="layui-btn layui-btn-xs" lay-event="edit">赋权限</a>
+    <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>
+</script>
+<script type="text/html" id="tableToolBar">
+    <a class="layui-btn layui-btn-xs" lay-event="add">增加</a>
+</script>
 </body>
 </html>

@@ -45,7 +45,6 @@
                     handler: function () {
                         update();
                     }
-
                 }]
             });
 

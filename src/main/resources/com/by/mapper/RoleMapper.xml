@@ -1,5 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
         <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.by.mapper.RoleMapper">
-
+       <select id="select" resultMap="Map">
+               select r.role_id as role_id,r.role_name as role_name,p.permission_name as permission_name from
+              (select * from t_role limit #{start},#{limit}) r left join t_rp rp on r.role_id = rp.role_id left join t_permission p on p.permission_Id = rp.permission_Id
+       </select>
+    <resultMap id="Map" type="com.by.vo.RoleVo" autoMapping="true">
+        <id column="role_id" property="roleId" ></id>
+        <collection property="permissions" ofType="com.by.model.Permission" autoMapping="true">
+        </collection>
+    </resultMap>
+    <insert id="insertRolePermission" parameterType="com.by.vo.RolePermissionVo">
+        insert into t_rp(role_id,permission_id) values
+        <foreach collection="rolePermissionVo.permissions" item="permissionId" separator=",">
+            (#{rolePermissionVo.roleId},#{permissionId})
+        </foreach>
+    </insert>
 </mapper>
