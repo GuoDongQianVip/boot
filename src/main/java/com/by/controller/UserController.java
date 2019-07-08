@@ -47,7 +47,7 @@ public class UserController {
         Map<String,Object> map = new HashMap <>();
         map.put("code",0);
         map.put("msg","");
-        map.put("count",list.size());
+        map.put("count",50);
         map.put("data",list);
         return map;
     }

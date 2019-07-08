@@ -24,8 +24,6 @@
                  pageList:[5,10,15,20,25],*/
                 columns:[[
                      {field:'permissionId',title:'权限编号',width:100},
-                    {field:'userName',title:'用户姓名',width:100},
-                    {field:'roleName',title:'用户角色',width:100},
                     {field:'permissionName',title:'权限姓名',width:100},
                 ]],toolbar: [{
                     iconCls: 'icon-add',

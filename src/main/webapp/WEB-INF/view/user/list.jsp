@@ -167,10 +167,10 @@ To change this template use File | Settings | File Templates.--%>
     });
 </script>
 <script type="text/html" id="userToolBar">
-    <shiro:hasRole name="vip">
+    <shiro:hasRole name="supervip">
     <a class="layui-btn layui-btn-xs" lay-event="edit">赋角色</a>
     </shiro:hasRole>
-    <shiro:hasRole name="supervip">
+    <shiro:hasRole name="vip">
     <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>
     </shiro:hasRole>
 </script>

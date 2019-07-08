@@ -207,11 +207,17 @@ To change this template use File | Settings | File Templates.--%>
     });
 </script>
 <script type="text/html" id="userToolBar">
+    <shiro:hasRole name="supervip">
     <a class="layui-btn layui-btn-xs" lay-event="edit">赋权限</a>
+    </shiro:hasRole>
+    <shiro:hasRole name="vip">
     <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>
+    </shiro:hasRole>
 </script>
 <script type="text/html" id="tableToolBar">
+    <shiro:hasRole name="user">
     <a class="layui-btn layui-btn-xs" lay-event="add">增加</a>
+    </shiro:hasRole>
 </script>
 </body>
 </html>

@@ -42,6 +42,7 @@ public class MyShiroConfig {
         map.put("/login.jsp","anon");
         map.put("/user/login","anon");
         map.put("/user/register","anon");
+        map.put("/register.jsp","anon");
         map.put("/user/logout","logout");
         map.put("/**","authc");
         factoryBean.setFilterChainDefinitionMap(map);
